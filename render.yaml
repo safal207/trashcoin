@@ -4,8 +4,8 @@ services:
     name: telegram-bot
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python bot.py"
+    startCommand: "python geo_bot.py"
     plan: free
     envVars:
       - key: YOUR_TELEGRAM_BOT_TOKEN
-        value: "ваш_токен_бота"
+        value: "7339488730:AAHEVnTQ3hpqTblbBZ0hOo6L2BhgnXiDNs8"
