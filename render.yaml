@@ -1,11 +1,8 @@
 # trashcoin
 services:
   - type: web
-    name: telegram-bot
+    name: trash-classifier-web
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python geo_bot.py"
+    startCommand: "gunicorn app:app"
     plan: free
-    envVars:
-      - key: TELEGRAM_BOT_TOKEN
-        value: "7339488730:AAHEVnTQ3hpqTblbBZ0hOo6L2BhgnXiDNs8"
