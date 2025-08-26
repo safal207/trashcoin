@@ -1,4 +1,6 @@
 import os
+import random
+import time
 
 import numpy as np
 import tensorflow as tf
@@ -20,27 +22,35 @@ if not os.path.exists(PHOTO_SAVE_PATH):
     os.makedirs(PHOTO_SAVE_PATH)
 
 
-# Загрузка модели (предварительно обученной модели)
+# Загрузка модели (заглушка)
 def load_trashnet_model():
-    print("Loading TrashNet model...")
-    model_url = (
-        "https://github.com/garythung/trashnet/raw/masteret-main/model/"
-        "garbage_deploy.h5"
-    )
-    model_path = tf.keras.utils.get_file(
-        "garbage_deploy.h5", model_url, cache_subdir="models"
-    )
-    model = tf.keras.models.load_model(model_path)
-    print("Model loaded successfully.")
-    return model
+    """
+    Stub function for loading the model.
+    Returns None because the model is currently unavailable.
+    """
+    print("Model loading is stubbed out as the model file is unavailable.")
+    return None
 
 
 # Загружаем модель один раз при старте
 TRASHNET_MODEL = load_trashnet_model()
 
 
-# Функция для классификации мусора на фотографии
+# Функция для классификации мусора на фотографии (заглушка)
 def classify_trash(image_path, model):
+    """
+    Stub function for classifying trash.
+    Returns a random classification since the model is unavailable.
+    """
+    # Если модель не загружена (что будет в данном случае), возвращаем случайный класс
+    if model is None:
+        trash_classes = [
+            "Стекло", "Бумага", "Картон", "Пластик", "Металл", "Прочий мусор"
+        ]
+        time.sleep(1)  # Имитируем задержку на обработку
+        return random.choice(trash_classes)
+
+    # Исходная логика, если модель будет доступна в будущем
     img = image.load_img(image_path, target_size=(224, 224))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
