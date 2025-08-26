@@ -7,5 +7,5 @@ services:
     startCommand: "python geo_bot.py"
     plan: free
     envVars:
-      - key: YOUR_TELEGRAM_BOT_TOKEN
+      - key: TELEGRAM_BOT_TOKEN
         value: "7339488730:AAHEVnTQ3hpqTblbBZ0hOo6L2BhgnXiDNs8"

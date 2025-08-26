@@ -1,0 +1,5 @@
+python-telegram-bot
+tensorflow
+numpy
+Pillow
+Flask
