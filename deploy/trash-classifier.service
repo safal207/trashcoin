@@ -1,0 +1,21 @@
+[Unit]
+Description=Gunicorn instance to serve the trash classifier web app
+After=network.target
+
+[Service]
+# Replace 'your_user' with the non-root user you are running the app as on your VPS
+User=your_user
+
+# Replace '/path/to/your/repo' with the full path to where you cloned the repository
+# e.g., /home/your_user/trash-classifier-app
+WorkingDirectory=/path/to/your/repo
+
+# This assumes you have created a virtual environment in the project directory (e.g., python -m venv venv)
+# The command points to the gunicorn executable inside the virtualenv
+ExecStart=/path/to/your/repo/venv/bin/gunicorn --workers 3 --bind unix:app.sock -m 007 app:app
+
+# Restart the service if it fails
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
