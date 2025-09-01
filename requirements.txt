@@ -1,6 +1,13 @@
+# Core dependencies for the project
 python-telegram-bot
-tensorflow
 numpy
 Pillow
-Flask
 gunicorn
+
+# Dependencies for the new ML API
+fastapi
+uvicorn[standard]
+onnxruntime
+scikit-image
+pydantic
+python-multipart

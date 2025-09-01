@@ -1,0 +1,11 @@
+# Class mapping for the TACO dataset, simplified for this project.
+# This file defines the master list of classes the model will predict.
+classes:
+  - plastic
+  - glass
+  - paper
+  - metal
+  - cardboard
+  - organic
+  - e_waste
+  - other

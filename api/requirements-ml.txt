@@ -1,0 +1,7 @@
+# Dependencies for training the model
+# These are not needed for running the inference API
+torch
+torchvision
+torchaudio
+tqdm
+pycocotools
