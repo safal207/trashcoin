@@ -1,6 +1,4 @@
 import os
-import random
-import time
 
 import numpy as np
 import tensorflow as tf
@@ -36,21 +34,19 @@ def load_trashnet_model():
 TRASHNET_MODEL = load_trashnet_model()
 
 
-# Функция для классификации мусора на фотографии (заглушка)
+# Функция для классификации мусора на фотографии
 def classify_trash(image_path, model):
-    """
-    Stub function for classifying trash.
-    Returns a random classification since the model is unavailable.
-    """
-    # Если модель не загружена (что будет в данном случае), возвращаем случайный класс
-    if model is None:
-        trash_classes = [
-            "Стекло", "Бумага", "Картон", "Пластик", "Металл", "Прочий мусор"
-        ]
-        time.sleep(1)  # Имитируем задержку на обработку
-        return random.choice(trash_classes)
+    """Classifies trash on an image with a loaded model.
 
-    # Исходная логика, если модель будет доступна в будущем
+    Raises:
+        RuntimeError: If model is unavailable.
+    """
+    if model is None:
+        raise RuntimeError(
+            "Classification model is unavailable. "
+            "Please configure a valid model before using this endpoint."
+        )
+
     img = image.load_img(image_path, target_size=(224, 224))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
