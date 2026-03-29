@@ -1,9 +1,5 @@
 import os
-import random
-import time
 
-import numpy as np
-import tensorflow as tf
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -12,7 +8,8 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from tensorflow.keras.preprocessing import image
+
+from classifier import TRASHNET_MODEL, classify_trash
 
 # Путь для сохранения загруженных фото
 PHOTO_SAVE_PATH = "./photos"
@@ -20,54 +17,6 @@ PHOTO_SAVE_PATH = "./photos"
 # Убедимся, что директория для фото существует
 if not os.path.exists(PHOTO_SAVE_PATH):
     os.makedirs(PHOTO_SAVE_PATH)
-
-
-# Загрузка модели (заглушка)
-def load_trashnet_model():
-    """
-    Stub function for loading the model.
-    Returns None because the model is currently unavailable.
-    """
-    print("Model loading is stubbed out as the model file is unavailable.")
-    return None
-
-
-# Загружаем модель один раз при старте
-TRASHNET_MODEL = load_trashnet_model()
-
-
-# Функция для классификации мусора на фотографии (заглушка)
-def classify_trash(image_path, model):
-    """
-    Stub function for classifying trash.
-    Returns a random classification since the model is unavailable.
-    """
-    # Если модель не загружена (что будет в данном случае), возвращаем случайный класс
-    if model is None:
-        trash_classes = [
-            "Стекло", "Бумага", "Картон", "Пластик", "Металл", "Прочий мусор"
-        ]
-        time.sleep(1)  # Имитируем задержку на обработку
-        return random.choice(trash_classes)
-
-    # Исходная логика, если модель будет доступна в будущем
-    img = image.load_img(image_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0
-
-    prediction = model.predict(img_array)
-    trash_classes = [
-        "Glass",
-        "Paper",
-        "Cardboard",
-        "Plastic",
-        "Metal",
-        "Trash",
-    ]
-    trash_class = trash_classes[np.argmax(prediction)]
-
-    return trash_class
 
 
 # Обработчик команды /start
@@ -105,7 +54,7 @@ async def photo(update: Update, context: CallbackContext) -> None:
     photo_path = os.path.join(PHOTO_SAVE_PATH, f"{file_id}.jpg")
     await new_file.download_to_drive(photo_path)
 
-    # Классификация мусора на фото (используем уже загруженную модель)
+    # Классификация мусора на фото
     trash_class = classify_trash(photo_path, TRASHNET_MODEL)
 
     # Отправка сообщения с результатом
