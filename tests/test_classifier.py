@@ -214,16 +214,18 @@ class TestClassifyTrashRouting:
 
 @pytest.fixture()
 def client():
-    """Flask test client with classification mocked out."""
-    # Patch model to None and classify_trash before importing app
+    """Flask test client with classification mocked out and rate limiter disabled."""
     with patch("classifier.TRASHNET_MODEL", None):
         with patch("classifier.load_trashnet_model", return_value=None):
             import importlib
             import app as app_module
             importlib.reload(app_module)
             app_module.app.config["TESTING"] = True
+            # Disable rate limiting in tests
+            app_module.limiter.enabled = False
             with app_module.app.test_client() as c:
                 yield c
+            app_module.limiter.enabled = True
 
 
 class TestClassifyEndpoint:
@@ -311,3 +313,46 @@ class TestClassifyEndpoint:
     def test_index_returns_200(self, client):
         resp = client.get("/")
         assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting tests
+# ---------------------------------------------------------------------------
+
+@pytest.fixture()
+def limited_client():
+    """Flask test client with rate limiter enabled."""
+    with patch("classifier.TRASHNET_MODEL", None):
+        with patch("classifier.load_trashnet_model", return_value=None):
+            import importlib
+            import app as app_module
+            importlib.reload(app_module)
+            app_module.app.config["TESTING"] = True
+            app_module.limiter.enabled = True
+            with app_module.app.test_client() as c:
+                yield c
+
+
+class TestRateLimiting:
+    def test_returns_429_after_limit_exceeded(self, limited_client):
+        img_bytes = _make_jpeg_bytes()
+
+        with patch("app.classify_trash", return_value="Glass"):
+            # 10 requests should succeed (limit is 10/minute)
+            for _ in range(10):
+                resp = limited_client.post(
+                    "/classify",
+                    data={"file": (io.BytesIO(img_bytes), "test.jpg")},
+                    content_type="multipart/form-data",
+                )
+                assert resp.status_code == 200
+
+            # 11th request must be rejected
+            resp = limited_client.post(
+                "/classify",
+                data={"file": (io.BytesIO(img_bytes), "test.jpg")},
+                content_type="multipart/form-data",
+            )
+        assert resp.status_code == 429
+        payload = json.loads(resp.data)
+        assert "Rate limit exceeded" in payload["error"]

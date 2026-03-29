@@ -1,12 +1,19 @@
 import os
 from flask import Flask, render_template, request, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
-# Import the classification functionality from our bot script
-# This will also load the model into memory when the app starts
 from classifier import TRASHNET_MODEL, classify_trash
 
 app = Flask(__name__)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri=os.environ.get("RATELIMIT_STORAGE_URI", "memory://"),
+)
 
 # Define a folder to store uploaded images
 UPLOAD_FOLDER = 'uploads'
@@ -27,6 +34,11 @@ def allowed_file(filename: str) -> bool:
     )
 
 
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({"error": f"Rate limit exceeded: {e.description}"}), 429
+
+
 @app.route('/')
 def index():
     """Renders the main page."""
@@ -35,6 +47,7 @@ def index():
 
 
 @app.route('/classify', methods=['POST'])
+@limiter.limit("10 per minute;50 per hour")
 def classify_image_route():
     """Receives an image, classifies it, and returns the result."""
     if 'file' not in request.files:

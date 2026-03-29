@@ -4,6 +4,7 @@ tensorflow-datasets
 numpy
 Pillow
 Flask
+Flask-Limiter
 gunicorn
 requests
 pytest
