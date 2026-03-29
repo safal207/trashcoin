@@ -1,5 +1,6 @@
 python-telegram-bot
 tensorflow
+tensorflow-datasets
 numpy
 Pillow
 Flask
