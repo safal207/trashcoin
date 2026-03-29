@@ -22,6 +22,10 @@ Example response:
 { "classification": "Plastic" }
 ```
 
+## Recommended service for this project
+
+For trash recognition with minimal setup, use a hosted custom model service (e.g. Roboflow Hosted API) and map its response to `classification`.
+
 ## Example
 
 ```bash

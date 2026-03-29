@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 
 # Import the classification functionality from our bot script
 # This will also load the model into memory when the app starts
-from geo_bot import TRASHNET_MODEL, classify_trash
+from classifier import TRASHNET_MODEL, classify_trash
 
 app = Flask(__name__)
 
