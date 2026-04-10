@@ -1,9 +1,20 @@
+import json
+import logging
 import os
 from dataclasses import dataclass
 
 import numpy as np
 import requests
 from tensorflow.keras.preprocessing import image
+
+logger = logging.getLogger(__name__)
+
+# Default path; override with MODEL_PATH env var
+_DEFAULT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "trashnet_model.keras")
+_DEFAULT_CLASSES_PATH = os.path.join(os.path.dirname(__file__), "model", "classes.json")
+
+# Fallback class order (matches TrashNet alphabetical labels)
+_FALLBACK_CLASSES = ["Cardboard", "Glass", "Metal", "Paper", "Plastic", "Trash"]
 
 
 @dataclass(frozen=True)
@@ -61,18 +72,49 @@ def classify_with_external_api(
     return classification
 
 
-# Загрузка модели (заглушка)
+def _load_classes(classes_path: str) -> list[str]:
+    try:
+        with open(classes_path) as f:
+            return [c.capitalize() for c in json.load(f)]
+    except (FileNotFoundError, json.JSONDecodeError):
+        return _FALLBACK_CLASSES
+
+
 def load_trashnet_model():
-    """Load local model if available.
+    """Load trained model from disk.
 
-    Current repository does not include trained weights.
+    Returns None if model file is not found (use `python train.py` to generate it).
     """
-    print("Model loading is stubbed out as the model file is unavailable.")
-    return None
+    model_path = os.environ.get("MODEL_PATH", _DEFAULT_MODEL_PATH)
+
+    if not os.path.exists(model_path):
+        logger.warning(
+            "Model file not found at '%s'. "
+            "Run `python train.py` to train and save the model. "
+            "Falling back to external API if configured.",
+            model_path,
+        )
+        return None
+
+    try:
+        import tensorflow as tf
+        model = tf.keras.models.load_model(model_path)
+        logger.info("Model loaded from '%s'.", model_path)
+        return model
+    except Exception:
+        logger.exception("Failed to load model from '%s'.", model_path)
+        return None
 
 
-# Загружаем модель один раз при старте
+# Load model once at startup
 TRASHNET_MODEL = load_trashnet_model()
+
+# Load class names alongside model
+_CLASSES_PATH = os.environ.get(
+    "CLASSES_PATH",
+    os.path.join(os.path.dirname(os.environ.get("MODEL_PATH", _DEFAULT_MODEL_PATH)), "classes.json"),
+)
+TRASH_CLASSES = _load_classes(_CLASSES_PATH)
 
 
 def classify_with_local_model(image_path: str, model) -> str:
@@ -81,16 +123,8 @@ def classify_with_local_model(image_path: str, model) -> str:
     img_array = np.expand_dims(img_array, axis=0)
     img_array /= 255.0
 
-    prediction = model.predict(img_array)
-    trash_classes = [
-        "Glass",
-        "Paper",
-        "Cardboard",
-        "Plastic",
-        "Metal",
-        "Trash",
-    ]
-    return trash_classes[np.argmax(prediction)]
+    prediction = model.predict(img_array, verbose=0)
+    return TRASH_CLASSES[np.argmax(prediction)]
 
 
 def classify_trash(image_path: str, model=None) -> str:

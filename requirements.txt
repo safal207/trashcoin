@@ -1,7 +1,10 @@
 python-telegram-bot
 tensorflow
+tensorflow-datasets
 numpy
 Pillow
 Flask
+Flask-Limiter
 gunicorn
 requests
+pytest

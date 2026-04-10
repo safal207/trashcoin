@@ -1,0 +1,18 @@
+# Model weights (train locally with python train.py)
+model/
+*.keras
+*.h5
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Uploads / bot photos
+uploads/
+photos/
+
+# Environment
+.env
