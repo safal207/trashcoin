@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 from dataclasses import dataclass
 
 import numpy as np
 import requests
 from tensorflow.keras.preprocessing import image
+
+logger = logging.getLogger(__name__)
 
 # Default path; override with MODEL_PATH env var
 _DEFAULT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "trashnet_model.keras")
@@ -85,20 +88,21 @@ def load_trashnet_model():
     model_path = os.environ.get("MODEL_PATH", _DEFAULT_MODEL_PATH)
 
     if not os.path.exists(model_path):
-        print(
-            f"Model file not found at '{model_path}'. "
+        logger.warning(
+            "Model file not found at '%s'. "
             "Run `python train.py` to train and save the model. "
-            "Falling back to external API if configured."
+            "Falling back to external API if configured.",
+            model_path,
         )
         return None
 
     try:
         import tensorflow as tf
         model = tf.keras.models.load_model(model_path)
-        print(f"Model loaded from '{model_path}'.")
+        logger.info("Model loaded from '%s'.", model_path)
         return model
-    except Exception as exc:
-        print(f"Failed to load model from '{model_path}': {exc}")
+    except Exception:
+        logger.exception("Failed to load model from '%s'.", model_path)
         return None
 
 
