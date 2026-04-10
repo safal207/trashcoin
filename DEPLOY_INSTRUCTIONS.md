@@ -98,11 +98,45 @@ pip install -r requirements.txt
     sudo systemctl restart nginx
     ```
 
-## Step 5: Access Your Site
+## Step 5: Enable HTTPS with Let's Encrypt (Certbot)
 
-You should now be able to access your web application by navigating to `http://your_domain` (or your server's IP address) in your web browser.
+A domain name pointing to your VPS is required for this step.
+
+1.  **Install Certbot:**
+    ```bash
+    sudo apt-get install certbot python3-certbot-nginx -y
+    ```
+
+2.  **Obtain a certificate** (Certbot will patch `nginx.conf` automatically):
+    ```bash
+    sudo certbot --nginx -d your_domain
+    ```
+    Follow the prompts. Choose to redirect HTTP → HTTPS when asked.
+
+3.  **Verify auto-renewal** (Certbot sets up a cron/systemd timer by default):
+    ```bash
+    sudo certbot renew --dry-run
+    ```
+
+4.  **Open firewall ports:**
+    ```bash
+    sudo ufw allow 'Nginx Full'   # ports 80 and 443
+    sudo ufw delete allow 'Nginx HTTP'
+    ```
+
+After this step your site is served over HTTPS and all HTTP traffic is permanently redirected.
+
+## Step 6: Access Your Site
+
+Navigate to `https://your_domain` in your browser. HTTP requests are automatically redirected to HTTPS.
 
 ---
-### Notes on Security
+### Environment variables
 
--   For a production site, you should set up a firewall (`ufw`) and configure Nginx to use HTTPS with a free SSL certificate from Let's Encrypt. This configuration only covers HTTP on port 80.
+| Variable | Default | Description |
+|---|---|---|
+| `LOG_LEVEL` | `INFO` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+| `RATELIMIT_STORAGE_URI` | `memory://` | Rate-limit backend. Use `redis://localhost:6379/0` in production |
+| `MODEL_PATH` | `model/trashnet_model.keras` | Path to trained model weights |
+| `EXTERNAL_CLASSIFIER_API_URL` | — | Fallback classifier API URL |
+| `EXTERNAL_CLASSIFIER_API_TOKEN` | — | Bearer token for fallback API |

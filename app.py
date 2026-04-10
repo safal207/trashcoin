@@ -6,6 +6,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from classifier import TRASHNET_MODEL, classify_trash
 from logging_config import setup_logging
 
@@ -13,6 +15,8 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+# Trust one upstream proxy (Nginx) for X-Forwarded-* headers
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 limiter = Limiter(
     get_remote_address,
